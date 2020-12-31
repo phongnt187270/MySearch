@@ -141,18 +141,18 @@ public class Search {
             e.printStackTrace();
         }
     }
-//    public static void case7() throws IOException {
-//        System.out.println("Case 7: Token and parameters are valid but author's id returned is invalid");
-//        LoginResp loginResp = getInfoFromServer("0974732000", "123456");
-//        SearchResp searchResp = Search("abc", "aaaaaaaaaa", loginResp.data.id, 1, 1);
-//        try {
-//           assert "1004".equals(searchResp.code) : "OK";
-//            System.out.println("Parameter value is invalid");
-//        }
-//        catch (AssertionError e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public static void case7() throws IOException {
+        System.out.println("Case 7: Token and parameters are valid but author's id returned is invalid");
+        LoginResp loginResp = getInfoFromServer("0974732000", "123456");
+        SearchResp searchResp = Search("abc", "aaaaaaaaaa", loginResp.data.id, 1, 1);
+        try {
+           assert "1004".equals(searchResp.code) : "OK";
+            System.out.println("Parameter value is invalid");
+        }
+        catch (AssertionError e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void case10() throws IOException{
         System.out.println("Case 10: Token and parameters is valid");
