@@ -1,5 +1,6 @@
 package Search;
 
+import Constant.Constant;
 import Login.LoginResp;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
@@ -7,10 +8,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
+
 public class Search {
     public static void main(String[] args) throws Exception {
-        case7();
     }
     public static SearchResp Search(String token, String keyword, String user_id, int index, int count) throws IOException {
         URL url = new URL(Constant.Search + "?token=" + token + "&keyword=" + keyword + "&user_id=" + user_id
@@ -20,7 +20,7 @@ public class Search {
         connection.setDoOutput(true);
         try {
             StringBuilder content;
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getResponseCode() / 100 == 2 ? connection.getInputStream() : connection.getErrorStream()))) {
                 String line;
                 content = new StringBuilder();
                 while ((line = in.readLine()) != null) {
@@ -39,15 +39,16 @@ public class Search {
         }
     }
 
-    public static SearchResp Search(String token, String user_id, int index, int count) throws IOException {
-        URL url = new URL(Constant.Search + "?token=" + token + "&user_id=" + user_id
+    public static SearchResp2 Search2(String token, String keyword, String user_id, int index, int count) throws IOException {
+        URL url = new URL(Constant.Search + "?token=" + token + "&keyword=" + keyword + "&user_id=" + user_id
                 + "&index=" + index + "&count=" + count);
+        System.out.println(url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         try {
             StringBuilder content;
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getResponseCode() / 100 == 2 ? connection.getInputStream() : connection.getErrorStream()))) {
                 String line;
                 content = new StringBuilder();
                 while ((line = in.readLine()) != null) {
@@ -59,8 +60,38 @@ public class Search {
             System.out.println(java_string_content);
             Gson g = new Gson();
 
+            return g.fromJson(java_string_content, SearchResp2.class);
+        }
+        finally {
+            connection.disconnect();
+        }
+    }
+
+    public static SearchResp Search(String token, String user_id, int index, int count) throws IOException, NullPointerException {
+        URL url = new URL(Constant.Search + "?token=" + token + "&user_id=" + user_id
+                + "&index=" + index + "&count=" + count);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        try {
+            StringBuilder content;
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getResponseCode() / 100 == 2 ? connection.getInputStream() : connection.getErrorStream()))) {
+                String line;
+
+                content = new StringBuilder();
+                while ((line = in.readLine()) != null) {
+                    content.append(line);
+                    content.append(System.lineSeparator());
+                }
+            }
+
+            String java_string_content = content.toString();
+            System.out.println(java_string_content);
+            Gson g = new Gson();
+
             return g.fromJson(java_string_content, SearchResp.class);
         }
+
         finally {
             connection.disconnect();
         }
@@ -95,7 +126,7 @@ public class Search {
     public static void case1() throws IOException {
         System.out.println("Case 1: Token is correct");
         LoginResp loginResp = getInfoFromServer("0974732000", "123456");
-        SearchResp searchResp = Search(loginResp.data.token, "aaaaaaaaaa", loginResp.data.id, 1, 1);
+        SearchResp2 searchResp = Search2(loginResp.data.token, "aaaaaaaaaa", loginResp.data.id, 1, 1);
         try {
             assert ("1000".equals(searchResp.code));
             System.out.println("OK");
@@ -106,7 +137,7 @@ public class Search {
     }
     public static void case2() throws IOException {
         System.out.println("Case 2: Token is invalid");
-//        LoginResp loginResp = getInfoFromServer("0974732000", "123456");
+        LoginResp loginResp = getInfoFromServer("0974732000", "123456");
         SearchResp searchResp = Search("abc", "aaa", "0", 1, 1);
         try {
             assert "9998".equals(searchResp.code) : "OK";
@@ -141,18 +172,18 @@ public class Search {
             e.printStackTrace();
         }
     }
-    public static void case7() throws IOException {
-        System.out.println("Case 7: Token and parameters are valid but author's id returned is invalid");
-        LoginResp loginResp = getInfoFromServer("0974732000", "123456");
-        SearchResp searchResp = Search("abc", "aaaaaaaaaa", loginResp.data.id, 1, 1);
-        try {
-           assert "1004".equals(searchResp.code) : "OK";
-            System.out.println("Parameter value is invalid");
-        }
-        catch (AssertionError e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void case7() throws IOException {
+//        System.out.println("Case 7: Token and parameters are valid but author's id returned is invalid");
+//        LoginResp loginResp = getInfoFromServer("0974732000", "123456");
+//        SearchResp searchResp = Search(loginResp.data.token, "aaaaaaaaaa", loginResp.data.id, 1, 1);
+//        try {
+//           assert "1004".equals(searchResp.code) : "OK";
+//            System.out.println("Parameter value is invalid");
+//        }
+//        catch (AssertionError e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public static void case10() throws IOException{
         System.out.println("Case 10: Token and parameters is valid");
@@ -187,7 +218,7 @@ public class Search {
     public static void case14() throws IOException{
         System.out.println("Case 14: Token and parameters is valid but idex and count are error");
         LoginResp loginResp = getInfoFromServer("0332416592","123456s");
-        SearchResp searchResp = Search(loginResp.data.token,"funny","20187270",2,10000);
+        SearchResp searchResp = Search(loginResp.data.token,"funny","20187270",2,2);
         try {
             assert "1001".equals(loginResp.code): "OK";
             System.out.println("Can't connect Internet");
