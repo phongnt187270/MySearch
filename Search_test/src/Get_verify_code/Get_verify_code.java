@@ -1,4 +1,5 @@
-package Check_verify_code;
+package Get_verify_code;
+
 
 import Constant.Constant;
 import com.google.gson.Gson;
@@ -8,13 +9,13 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class Check_verify_code {
+public class Get_verify_code {
     public static void main(String[] args)throws Exception {
-
+        case2();
     }
 
-    public static Check_verify_codeResp Check_verify_code(String phonenumber, String code_verify) throws IOException {
-        URL url = new URL(Constant.Check + "?phonenumber=" + phonenumber + "&code_verify=" + code_verify );
+    public static Get_verify_codeResp get_verify_code(String phonenumber) throws IOException {
+        URL url = new URL(Constant.Get + "?phonenumber=" + phonenumber);
         System.out.println(url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
@@ -33,7 +34,7 @@ public class Check_verify_code {
             System.out.println(java_string_content);
             Gson g = new Gson();
 
-            return g.fromJson(java_string_content, Check_verify_codeResp.class);
+            return g.fromJson(java_string_content, Get_verify_codeResp.class);
         }
         finally {
             connection.disconnect();
@@ -42,9 +43,9 @@ public class Check_verify_code {
 
     public static void case1() throws IOException {
         System.out.println("Case 1: Token is correct");
-        Check_verify_codeResp check_verify_codeResp = Check_verify_code("0904516406", "680956");
+        Get_verify_codeResp get_verify_codeResp = get_verify_code("0904516406");
         try {
-            assert ("1000".equals(check_verify_codeResp.code));
+            assert ("1000".equals(get_verify_codeResp.code));
             System.out.println("OK");
         }
         catch (AssertionError e) {
@@ -53,28 +54,14 @@ public class Check_verify_code {
     }
 
     public static void case2() throws IOException {
-        System.out.println("Case 2: Parameters are invalid");
-        Check_verify_codeResp check_verify_codeResp = Check_verify_code("090451640a", "680956");
+        System.out.println("Case 2: Phonenumber haven't been signuped");
+        Get_verify_codeResp get_verify_codeResp = get_verify_code("0904516406");
         try {
-            assert ("1004".equals(check_verify_codeResp.code)) : "OK";
+            assert ("1004".equals(get_verify_codeResp.code)) : "OK";
             System.out.println("Parameter value is invalid");
         }
         catch (AssertionError e) {
             e.printStackTrace();
         }
     }
-
-    public static void case3() throws IOException {
-        System.out.println("Case 3: phonenumber is invalid");
-        Check_verify_codeResp check_verify_codeResp = Check_verify_code("0904516406", "");
-        try {
-            assert ("1002".equals(check_verify_codeResp.code)) : "OK";
-            System.out.println("Parameter is not enough");
-        }
-        catch (AssertionError e) {
-            e.printStackTrace();
-        }
-    }
-
-
 }
